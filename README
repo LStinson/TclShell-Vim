@@ -11,3 +11,6 @@ Installation:
     Copy the files to your ~/.vim or ~/vimfiles dorectory.
     If using a package manager like pathogen place the whole directory in the
     bundle directory.
+
+Vim Home:    http://www.vim.org/scripts/script.php?script_id=3750
+GitHub Home: https://github.com/LStinson/TclShell-Vim

@@ -1,6 +1,7 @@
 *TclShell.txt*	For Vim version 7.x.	Last Change: Thu, Sep 22, 2011
 
                    https://github.com/LStinson/TclShell-Vim
+             http://www.vim.org/scripts/script.php?script_id=3750
                         By Lorance Stinson AT Gmail...
 
 Tcl Shell for Vim				*tclshell* *tclshell-vim*
