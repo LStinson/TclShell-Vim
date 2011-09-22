@@ -1,0 +1,13 @@
+A Tcl Shell for Vim using the integrated tcl interpreter.
+
+Creates a new buffer and window that resembles a shell. Tcl code can be
+entered and is executed once Enter is pressed.
+
+Requires Vim be compiles with the +tcl feature.
+
+Based on Shell.vim: http://www.vim.org/scripts/script.php?script_id=118
+
+Installation:
+    Copy the files to your ~/.vim or ~/vimfiles dorectory.
+    If using a package manager like pathogen place the whole directory in the
+    bundle directory.
