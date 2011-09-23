@@ -1,6 +1,6 @@
 " =============================================================================
 " File:         TclShell.vim
-" Last Changed: Thu, Sep 22, 2011
+" Last Changed: Thu, Sep 23, 2011
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 " Usage:        Place in plugins folder.
@@ -30,6 +30,11 @@ endif
 " Default key mapping to open the shell buffer
 if !exists("g:TclShellKey")
     let g:TclShellKey = '<Leader>tcl'
+endif
+
+" Enable the extended Tcl Shell Window mappings by defailt.
+if !exists("g:TclShellDisableExtMap")
+    let g:TclShellDisableExtMap = 0
 endif
 
 " Default to a maximum of 50 items in the history.
@@ -102,29 +107,35 @@ endfunction
 
 " Prepare the syntax for the buffer.
 function! TclShellInitSyntax()
+    " Standard key mappings to execute code.
     nnoremap <silent> <buffer> <cr>             :call TclShellExec()<cr>
     inoremap <silent> <buffer> <cr>        <Esc>:call TclShellExec()<cr>
-    exec 'nnoremap <silent> <buffer> <C-A>      0' . s:promptlen . 'l'
-    exec 'inoremap <silent> <buffer> <C-A> <Esc>0' . s:promptlen . 'li'
-    nnoremap <silent> <buffer> <C-B>            h
-    inoremap <silent> <buffer> <C-B>       <Esc>ha
-    nnoremap <silent> <buffer> <C-D>            :close<cr>
-    inoremap <silent> <buffer> <C-D>       <Esc>:close<cr>
-    nnoremap <silent> <buffer> <C-E>            $
-    inoremap <silent> <buffer> <C-E>       <Esc>A
-    nnoremap <silent> <buffer> <C-F>            l
-    inoremap <silent> <buffer> <C-K>       <Esc>ld$a
-    nnoremap <silent> <buffer> <C-K>            d$
-    inoremap <silent> <buffer> <C-F>       <Esc>la
-    nnoremap <silent> <buffer> <C-L>            :call TclShellClear()<cr>
-    inoremap <silent> <buffer> <C-L>       <Esc>:call TclShellClear()<cr>
-    nnoremap <silent> <buffer> <C-N>            :call TclShellHist(0)<cr>
-    inoremap <silent> <buffer> <C-N>       <Esc>:call TclShellHist(0)<cr>
-    nnoremap <silent> <buffer> <C-P>            :call TclShellHist(1)<cr>
-    inoremap <silent> <buffer> <C-P>       <Esc>:call TclShellHist(1)<cr>
-    exec 'nnoremap <silent> <buffer> <C-U>      0' . s:promptlen . 'lD'
-    exec 'inoremap <silent> <buffer> <C-U> <Esc>0' . s:promptlen . 'lDa'
-    "inoremap <silent> <buffer> <C-W> <Esc><C-W>
+
+    " Extended key mappings to behave like a terminal.
+    if !g:TclShellDisableExtMap
+        exec 'nnoremap <silent> <buffer> <C-A>      0' . s:promptlen . 'l'
+        exec 'inoremap <silent> <buffer> <C-A> <Esc>0' . s:promptlen . 'li'
+        nnoremap <silent> <buffer> <C-B>            h
+        inoremap <silent> <buffer> <C-B>       <Esc>ha
+        nnoremap <silent> <buffer> <C-D>            :close<cr>
+        inoremap <silent> <buffer> <C-D>       <Esc>:close<cr>
+        nnoremap <silent> <buffer> <C-E>            $
+        inoremap <silent> <buffer> <C-E>       <Esc>A
+        nnoremap <silent> <buffer> <C-F>            l
+        inoremap <silent> <buffer> <C-K>       <Esc>ld$a
+        nnoremap <silent> <buffer> <C-K>            d$
+        inoremap <silent> <buffer> <C-F>       <Esc>la
+        nnoremap <silent> <buffer> <C-L>            :call TclShellClear()<cr>
+        inoremap <silent> <buffer> <C-L>       <Esc>:call TclShellClear()<cr>
+        nnoremap <silent> <buffer> <C-N>            :call TclShellHist(0)<cr>
+        inoremap <silent> <buffer> <C-N>       <Esc>:call TclShellHist(0)<cr>
+        nnoremap <silent> <buffer> <C-P>            :call TclShellHist(1)<cr>
+        inoremap <silent> <buffer> <C-P>       <Esc>:call TclShellHist(1)<cr>
+        exec 'nnoremap <silent> <buffer> <C-U>      0' . s:promptlen . 'lD'
+        exec 'inoremap <silent> <buffer> <C-U> <Esc>0' . s:promptlen . 'lDa'
+    endif
+
+    " Configure the syntax.
     exec 'syn include @TclSyn syntax/tcl.vim'
     exec 'syn region TclPrompt matchgroup=TclShell keepend start="' .
        \ g:TclShellPrompt . '" end=+$+ contains=@TclSyn'
