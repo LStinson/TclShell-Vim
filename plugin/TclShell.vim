@@ -28,8 +28,11 @@ endif
 
 " Default key mapping to open the shell buffer
 if !exists("g:TclShellKey")
-    let g:TclShellKey='<Leader>tcl'
+    let g:TclShellKey = '<Leader>tcl'
 endif
+
+" Start with no previous command.
+let g:TclShellPrevLine = ""
 
 " Key mapping and command.
 if g:TclShellKey != ""
@@ -42,30 +45,28 @@ command! -nargs=? TclShell :call TclShellInit(<f-args>)
 
 " Create and prepare the buffer.
 function! TclShellInit (...)
-    " See if we are in the shell already.
-    if expand("%:p:t") == "_TclShell_"
-        return
-    endif
-
-    " Make the buffer or switch to it.
-    if bufexists ("_TclShell_")
-        let winnbr = bufwinnr("_TclShell_")
-        if winnbr == -1
-            sbuffer _TclShell_
-            call TclShellInitSyntax()
+    " If not already in the buffer create/open it.
+    if expand("%:p:t") != "_TclShell_"
+        " Make the buffer or switch to it.
+        if bufexists ("_TclShell_")
+            let winnbr = bufwinnr("_TclShell_")
+            if winnbr == -1
+                sbuffer _TclShell_
+                call TclShellInitSyntax()
+            else
+                execute winnbr . 'wincmd w'
+            endif
         else
-            execute winnbr . 'wincmd w'
+            split _TclShell_
+            call TclShellInitSyntax()
         endif
-    else
-        split _TclShell_
-        call TclShellInitSyntax()
-    endif
 
-    " Reset these every time the buffer is entered.
-    setlocal buftype=nofile
-    setlocal bufhidden=hide
-    setlocal noswapfile
-    call TclShellPrompt()
+        " Reset these every time the buffer is entered.
+        setlocal buftype=nofile
+        setlocal bufhidden=hide
+        setlocal noswapfile
+        call TclShellPrompt()
+    endif
 
     " If there is an argument execute it.
     if a:0 == 1
@@ -92,13 +93,37 @@ endfunction
 
 " Prepare the syntax for the buffer.
 function! TclShellInitSyntax()
-    nnoremap <silent> <buffer> <cr> :call TclShellExec()<cr>
-    inoremap <silent> <buffer> <cr> <Esc>:call TclShellExec()<cr>
-    nnoremap <silent> <buffer> <C-L> :call TclShellClear()<cr>
+    let l:promptlen = len(g:TclShellPrompt)
+    nnoremap <silent> <buffer> <cr>             :call TclShellExec()<cr>
+    inoremap <silent> <buffer> <cr>        <Esc>:call TclShellExec()<cr>
+    exec 'nnoremap <silent> <buffer> <C-A>      0' . l:promptlen . 'l'
+    exec 'inoremap <silent> <buffer> <C-A> <Esc>0' . l:promptlen . 'li'
+    nnoremap <silent> <buffer> <C-D>            :close<cr>
+    inoremap <silent> <buffer> <C-D>       <Esc>:close<cr>
+    nnoremap <silent> <buffer> <C-E>            $
+    inoremap <silent> <buffer> <C-E>       <Esc>:startinsert!<cr>
+    nnoremap <silent> <buffer> <C-L>            :call TclShellClear()<cr>
+    inoremap <silent> <buffer> <C-L>       <Esc>:call TclShellClear()<cr>
+    nnoremap <silent> <buffer> <C-P>            :call TclShellPrev()<cr>
+    inoremap <silent> <buffer> <C-P>       <Esc>:call TclShellPrev()<cr>
+    exec 'nnoremap <silent> <buffer> <C-U>      0' . l:promptlen . 'lD'
+    exec 'inoremap <silent> <buffer> <C-U> <Esc>0' . l:promptlen . 'lDa'
+    "inoremap <silent> <buffer> <C-W> <Esc><C-W>
     exec 'syn include @TclSyn syntax/tcl.vim'
     exec 'syn region TclPrompt matchgroup=TclShell keepend start="' .
        \ g:TclShellPrompt . '" end=+$+ contains=@TclSyn'
     exec "hi link TclShell Comment"
+    if g:TclShellInsert
+        au BufEnter <buffer> startinsert!
+    endif
+endfunction
+
+" Append the previous command to the current line.
+function! TclShellPrev()
+    exec 'normal a' . g:TclShellPrevLine
+    if g:TclShellInsert
+        startinsert!
+    endif
 endfunction
 
 " Clear the shell buffer.
@@ -118,6 +143,7 @@ function! TclShellExec()
         if l:tclcode =~ "^clear\\>"
             normal ggdG
         else
+            let g:TclShellPrevLine = l:tclcode
             call append(line('$'), l:tclcode)
             normal G$
             call TclShellExecLine()
@@ -137,7 +163,12 @@ catch {
     eval $_tclshelltemp
 } _tclshelltemp
 ::vim::command "normal dd"
-$::vim::current(buffer) append end $_tclshelltemp
+if {$_tclshelltemp ne ""} {
+    foreach _tclshelltemparg [split $_tclshelltemp "\n\r"] {
+        $::vim::current(buffer) append end $_tclshelltemparg
+    }
+    unset _tclshelltemparg
+}
 unset _tclshelltemp
 EOF
 endfunction
