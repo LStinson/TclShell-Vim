@@ -20,6 +20,7 @@ let g:loadedTclShell= 1
 if !exists("g:TclShellPrompt")
     let g:TclShellPrompt = "Tcl Shell # "
 endif
+let s:promptlen = len(g:TclShellPrompt)
 
 " Default to insert mode in the Shell window.
 if !exists("g:TclShellInsert")
@@ -31,8 +32,15 @@ if !exists("g:TclShellKey")
     let g:TclShellKey = '<Leader>tcl'
 endif
 
-" Start with no previous command.
-let g:TclShellPrevLine = ""
+" Default to a maximum of 50 items in the history.
+" Set to 0 to disable history.
+if !exists("g:TclShellHistMax")
+    let g:TclShellHistMax = 50
+endif
+
+" Start with no history.
+let s:TclShellHistory=[]
+let s:TclShellHistPtr=-1
 
 " Key mapping and command.
 if g:TclShellKey != ""
@@ -89,25 +97,33 @@ function! TclShellPrompt ()
     if g:TclShellInsert
         startinsert!
     endif
+    let s:TclShellHistPtr=-1
 endfunction
 
 " Prepare the syntax for the buffer.
 function! TclShellInitSyntax()
-    let l:promptlen = len(g:TclShellPrompt)
     nnoremap <silent> <buffer> <cr>             :call TclShellExec()<cr>
     inoremap <silent> <buffer> <cr>        <Esc>:call TclShellExec()<cr>
-    exec 'nnoremap <silent> <buffer> <C-A>      0' . l:promptlen . 'l'
-    exec 'inoremap <silent> <buffer> <C-A> <Esc>0' . l:promptlen . 'li'
+    exec 'nnoremap <silent> <buffer> <C-A>      0' . s:promptlen . 'l'
+    exec 'inoremap <silent> <buffer> <C-A> <Esc>0' . s:promptlen . 'li'
+    nnoremap <silent> <buffer> <C-B>            h
+    inoremap <silent> <buffer> <C-B>       <Esc>ha
     nnoremap <silent> <buffer> <C-D>            :close<cr>
     inoremap <silent> <buffer> <C-D>       <Esc>:close<cr>
     nnoremap <silent> <buffer> <C-E>            $
-    inoremap <silent> <buffer> <C-E>       <Esc>:startinsert!<cr>
+    inoremap <silent> <buffer> <C-E>       <Esc>A
+    nnoremap <silent> <buffer> <C-F>            l
+    inoremap <silent> <buffer> <C-K>       <Esc>ld$a
+    nnoremap <silent> <buffer> <C-K>            d$
+    inoremap <silent> <buffer> <C-F>       <Esc>la
     nnoremap <silent> <buffer> <C-L>            :call TclShellClear()<cr>
     inoremap <silent> <buffer> <C-L>       <Esc>:call TclShellClear()<cr>
-    nnoremap <silent> <buffer> <C-P>            :call TclShellPrev()<cr>
-    inoremap <silent> <buffer> <C-P>       <Esc>:call TclShellPrev()<cr>
-    exec 'nnoremap <silent> <buffer> <C-U>      0' . l:promptlen . 'lD'
-    exec 'inoremap <silent> <buffer> <C-U> <Esc>0' . l:promptlen . 'lDa'
+    nnoremap <silent> <buffer> <C-N>            :call TclShellHist(0)<cr>
+    inoremap <silent> <buffer> <C-N>       <Esc>:call TclShellHist(0)<cr>
+    nnoremap <silent> <buffer> <C-P>            :call TclShellHist(1)<cr>
+    inoremap <silent> <buffer> <C-P>       <Esc>:call TclShellHist(1)<cr>
+    exec 'nnoremap <silent> <buffer> <C-U>      0' . s:promptlen . 'lD'
+    exec 'inoremap <silent> <buffer> <C-U> <Esc>0' . s:promptlen . 'lDa'
     "inoremap <silent> <buffer> <C-W> <Esc><C-W>
     exec 'syn include @TclSyn syntax/tcl.vim'
     exec 'syn region TclPrompt matchgroup=TclShell keepend start="' .
@@ -118,9 +134,26 @@ function! TclShellInitSyntax()
     endif
 endfunction
 
-" Append the previous command to the current line.
-function! TclShellPrev()
-    exec 'normal a' . g:TclShellPrevLine
+" Move forward and back in history.
+" Direction is true for up, false for down.
+function! TclShellHist(dir)
+    if len(s:TclShellHistory)
+        if a:dir
+            if (s:TclShellHistPtr + 1) < len(s:TclShellHistory)
+                let s:TclShellHistPtr += 1
+            endif
+        else
+            if s:TclShellHistPtr >= 0
+                let s:TclShellHistPtr -= 1
+            endif
+        endif
+        if s:TclShellHistPtr >= 0
+            let l:histtext = s:TclShellHistory[s:TclShellHistPtr]
+        else
+            let l:histtext = ''
+        endif
+        call setline('.', g:TclShellPrompt . l:histtext)
+    endif
     if g:TclShellInsert
         startinsert!
     endif
@@ -143,7 +176,12 @@ function! TclShellExec()
         if l:tclcode =~ "^clear\\>"
             normal ggdG
         else
-            let g:TclShellPrevLine = l:tclcode
+            if g:TclShellHistMax
+                if len(s:TclShellHistory) >= g:TclShellHistMax
+                    let s:TclShellHistory = remove(s:TclShellHistory, -1)
+                endif
+                call insert(s:TclShellHistory, l:tclcode)
+            endif
             call append(line('$'), l:tclcode)
             normal G$
             call TclShellExecLine()
@@ -153,6 +191,8 @@ function! TclShellExec()
     endif
 endfunction
 
+" Perform the actual Tcl execution.
+" Reads the line, evaluates it, deletes the line then appends the result.
 function! TclShellExecLine()
 :tcl << EOF
 set _tclshelltemp [::vim::expr "getline('.')"]
