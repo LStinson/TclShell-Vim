@@ -58,13 +58,18 @@ Note: The |Leader| key is normally set to "\".
 The following mappings are defined only in the TclShell Window.
 See 'g:TclShellDisableExtMap' in |tclshell-settings| to disable these mapping.
 
-CTRL-B      Move backwards one character.
+ALT-B       Move backward one word.
+ALT-F       Move forward one word.
+
+CTRL-B      Move backward one character.
 CTRL-D      Close the Tcl Shell Window.
 CTRL-E      Move to the end of the line.
 CTRL-F      Move forward one character.
 CTRL-K      Delete from the cursor to the end of the line.
 CTRL-L      Clear the Tcl Shell Window, like CTRL-L on a terminal.
 CTRL-N      Move down in history to to newer entries.
+CTRL-T      Transpose the character under the cursor with the previous
+            character.
 CTRL-P      Move up in history to to older entries.
 
 ==============================================================================
@@ -73,6 +78,14 @@ SETTINGS                                        *tclshell-settings*
 g:loadedTclShell
         To completey disable the plugin set this to 1. >
                  let :loadedTclShell = 0
+<
+
+ig:TclShellPrompt
+        The prompt to display in the Tcl Shell Window.
+        Defaults to "Tcl Shell # ".
+        Note: Once the Tcl Shell is opened changes to this variable will not
+              be recognized. >
+                    let g:TclShellPrompt = "Tcl Shell # "
 <
 
 g:TclShellInsert
