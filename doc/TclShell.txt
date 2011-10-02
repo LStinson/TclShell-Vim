@@ -2,6 +2,7 @@
 
                    https://github.com/LStinson/TclShell-Vim
              http://www.vim.org/scripts/script.php?script_id=3750
+                             http://wiki.tcl.tk/
                         By Lorance Stinson AT Gmail...
 
 Tcl Shell for Vim                               *tclshell* *tclshell-vim*
@@ -23,7 +24,12 @@ Creates a new buffer and window that resembles a shell. Tcl code can be
 entered and is executed once Enter is pressed. The window has key mappings
 that make it behave like a normal shell on a terminal.
 
-Requires Vim be compiles with the |+tcl| feature.
+Note:   Only one line of code can be entered. Once enter is pressed the code is
+        executed. You can still enter multiple statements separated by a
+        semicolon ';'.
+
+Requires Vim 7 or later compiled with the |+tcl| feature. If TclShell does not
+appear to work use |:version| to make sure the |+tcl| feature is present.
 
 Based on Shell.vim: http://www.vim.org/scripts/script.php?script_id=118
 
@@ -54,12 +60,16 @@ change/disable this mapping.
         Opens the Tcl Shell window.
         In visual mode opens the window and executes the highlighted TCL code.
 
-Note: The |Leader| key is normally set to "\".
+Note:   The |Leader| key is normally set to "\".
 
 The following mappings are defined only in the TclShell Window.
 See 'g:TclShellDisableExtMap' in |tclshell-settings| to disable these mapping.
 
+Note:   The ALT key mappings may not work in all terminals. See |:map-alt-keys|
+        for details.
+
 ALT-B       Move backward one word.
+ALT-D       Delete the word under the cursor.
 ALT-F       Move forward one word.
 
 CTRL-B      Move backward one character.

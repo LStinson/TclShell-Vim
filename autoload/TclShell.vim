@@ -111,6 +111,8 @@ function! TclShell#Init()
         " Alt Keys.
         inoremap <silent> <buffer> <A-b>       <Esc>Bi
         nnoremap <silent> <buffer> <A-b>            B
+        inoremap <silent> <buffer> <A-d>       <Esc>ldwgi
+        nnoremap <silent> <buffer> <A-d>            dw
         inoremap <silent> <buffer> <A-f>       <Esc>Ea
         nnoremap <silent> <buffer> <A-f>            El
     endif

@@ -7,16 +7,22 @@
 " Description:  Setup the keys to call TclShell.
 "               The rest of the code is autoloaded when/if needed.
 "
-" Usage:        Place in plugins folder.
-"               Execute :TclShell or type <Leader>tcl
+" Usage:        Execute :TclShell or type <Leader>tcl
 "               (Leader is normally '\')
 "               Ctrl-L clears the display.
+"
+" Installation: Copy the files to your ~/.vim or ~/vimfiles dorectory.
+"               If using a package manager like pathogen place the whole
+"               directory in the bundle directory.
 "
 " Note:         Can only enter one line of code.
 "               Pressing Enter executes the code.
 " =============================================================================
 
-if exists("g:loadedTclShell") || &cp || !has('tcl')
+if v:version < 700
+    echoerr 'TclShell requires Vim 7 or later.'
+    finish
+elseif exists("g:loadedTclShell") || &cp || !has('tcl')
     finish
 endif
 let g:loadedTclShell= 1
