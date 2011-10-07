@@ -16,31 +16,42 @@ let g:loadedTclShellAuto= 1
 
 " Section: Settings {{{1
 
-" Default prompt.
-if !exists("g:TclShellPrompt")
-    let g:TclShellPrompt = "Tcl Shell # "
-endif
+" Function: s:SetDefault(option, default) - Set a default value for an option.
+function! s:SetDefault(option, default)
+    if !exists(a:option)
+        let l:cmd = 'let ' . a:option . '='
+        let l:type = type(a:default)
+        if l:type == type("")
+            let l:cmd .= '"' . a:default . '"'
+        elseif l:type == type(0)
+            let l:cmd .= a:default
+        elseif l:type == type([])
+            let l:cmd .= string(a:default)
+        endif
+        exec l:cmd
+    endif
+endfunction
 
-" Cache the prompt length for calculations.
-" Save the prompt in case the user changes it.
-let s:prompttext = g:TclShellPrompt
-let s:promptlen = len(s:prompttext)
+" Default prompt.
+call s:SetDefault('g:TclShellPrompt', "Tcl Shell # ")
 
 " Default to insert mode in the Shell window.
-if !exists("g:TclShellInsert")
-    let g:TclShellInsert = 1
-endif
+call s:SetDefault('g:TclShellInsert', 1)
 
 " Enable the extended Tcl Shell Window mappings by default.
-if !exists("g:TclShellDisableExtMap")
-    let g:TclShellDisableExtMap = 0
-endif
+call s:SetDefault('g:TclShellDisableExtMap', 0)
 
 " Default to a maximum of 50 items in the history.
 " Set to 0 to disable history.
-if !exists("g:TclShellHistMax")
-    let g:TclShellHistMax = 50
-endif
+call s:SetDefault('g:TclShellHistMax', 50)
+
+" No need for the function any longer.
+delfunction s:SetDefault
+
+" Cache the prompt length for calculations and key maps.
+" Save the prompt in case the user changes it.
+let s:prompttext = g:TclShellPrompt
+let s:promptlen = len(s:prompttext)
 
 " Start with no history.
 let s:TclShellHistory=[]
