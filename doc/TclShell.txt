@@ -36,7 +36,7 @@ Based on Shell.vim: http://www.vim.org/scripts/script.php?script_id=118
 ==============================================================================
 INSTALLATION                                    *tclshell-installation*
 
-Copy the files to your ~/.vim or ~/vimfiles dorectory.
+Copy the files to your ~/.vim or ~/vimfiles directory.
 If using a package manager like pathogen place the whole directory in the
 bundle directory.
 

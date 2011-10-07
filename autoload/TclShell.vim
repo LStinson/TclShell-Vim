@@ -1,3 +1,4 @@
+" vim:foldmethod=marker
 " ============================================================================
 " File:         TclShell.vim (Autoload)
 " Last Changed: Sun, Sep 25, 2011
@@ -12,6 +13,8 @@ if exists("g:loadedTclShellAuto") || &cp || !has('tcl')
     finish
 endif
 let g:loadedTclShellAuto= 1
+
+" Section: Settings {{{1
 
 " Default prompt.
 if !exists("g:TclShellPrompt")
@@ -28,7 +31,7 @@ if !exists("g:TclShellInsert")
     let g:TclShellInsert = 1
 endif
 
-" Enable the extended Tcl Shell Window mappings by defailt.
+" Enable the extended Tcl Shell Window mappings by default.
 if !exists("g:TclShellDisableExtMap")
     let g:TclShellDisableExtMap = 0
 endif
@@ -43,7 +46,10 @@ endif
 let s:TclShellHistory=[]
 let s:TclShellHistPtr=-1
 
-" Create or switch to the Tcl Shell buffer.
+" Section: Functions. {{{1
+
+" Function: TclShell#OpenShell(...) -- Create or switch to the Tcl Shell buffer. {{{2
+" Takes optional Tcl code to execute.
 function! TclShell#OpenShell(...)
     " If not already in the buffer create/open it.
     if expand("%:p:t") != "_TclShell_"
@@ -76,7 +82,7 @@ function! TclShell#OpenShell(...)
     endif
 endfunction
 
-" Initialize a new buffer.
+" Function: TclShell#Init()         -- Initialize a new buffer. {{{2
 function! TclShell#Init()
     " Standard key mappings to execute code.
     nnoremap <silent> <buffer> <cr>             :call TclShell#Exec()<cr>
@@ -130,7 +136,7 @@ function! TclShell#Init()
     call TclShell#InitTcl()
 endfunction
 
-" Display the prompt.
+" Function: TclShell#Prompt()       -- Display the prompt. {{{2
 function! TclShell#Prompt()
     let l:line = getline("$")
     if matchstr(l:line, s:prompttext) == ""
@@ -146,6 +152,7 @@ function! TclShell#Prompt()
     let s:TclShellHistPtr=-1
 endfunction
 
+" Function: TclShell#Hist(dir)      -- Move in the history. {{{2
 " Move forward and back in history.
 " Direction is true for up, false for down.
 function! TclShell#Hist(dir)
@@ -171,13 +178,13 @@ function! TclShell#Hist(dir)
     endif
 endfunction
 
-" Clear the shell buffer.
+" Function: TclShell#Clear()        -- Clear the shell buffer. {{{2
 function! TclShell#Clear()
     normal ggdG
     :call TclShell#Prompt()
 endfunction
 
-" Execute a line of Tcl code.
+" Function: TclShell#Exec()         -- Execute a line of Tcl code. {{{2
 function! TclShell#Exec()
     let l:line = getline('.')
     if match(l:line, s:prompttext) < 0
@@ -205,11 +212,12 @@ function! TclShell#Exec()
     endif
 endfunction
 
+" Function: TclShell#InitTcl()      -- Initialize the Tcl interpreter. {{{2
 " Create the procedure to evaluate commands entered in the shell.
 " Since the interpreter will likely outlast the buffer check that the
 " procedure does not exist first.
 " Also create a replacement puts command to collect output.
-" Otherwise output goes to the vim output area.
+" Otherwise output goes to the Vim output area.
 function! TclShell#InitTcl()
 :tcl << EOF
 if {[info procs ::_TclShellEval] eq ""} {
