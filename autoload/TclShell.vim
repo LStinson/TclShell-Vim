@@ -9,41 +9,36 @@
 "               Only load it if/when the shell is called.
 " ============================================================================
 
+" Section: Initialization
+
+" Only load once. {{{1
 if exists("g:loadedTclShellAuto") || &cp || !has('tcl')
     finish
 endif
 let g:loadedTclShellAuto= 1
 
-" Section: Settings {{{1
+
+" Defaults  {{{1
 
 " Function: s:SetDefault(option, default) - Set a default value for an option.
 function! s:SetDefault(option, default)
     if !exists(a:option)
-        let l:cmd = 'let ' . a:option . '='
-        let l:type = type(a:default)
-        if l:type == type("")
-            let l:cmd .= '"' . a:default . '"'
-        elseif l:type == type(0)
-            let l:cmd .= a:default
-        elseif l:type == type([])
-            let l:cmd .= string(a:default)
-        endif
-        exec l:cmd
+        execute 'let ' . a:option . '=' . string(a:default)
     endif
 endfunction
 
 " Default prompt.
-call s:SetDefault('g:TclShellPrompt', "Tcl Shell # ")
+call s:SetDefault('g:TclShellPrompt',           "Tcl Shell # ")
 
 " Default to insert mode in the Shell window.
-call s:SetDefault('g:TclShellInsert', 1)
+call s:SetDefault('g:TclShellInsert',           1)
 
 " Enable the extended Tcl Shell Window mappings by default.
-call s:SetDefault('g:TclShellDisableExtMap', 0)
+call s:SetDefault('g:TclShellDisableExtMap',    0)
 
 " Default to a maximum of 50 items in the history.
 " Set to 0 to disable history.
-call s:SetDefault('g:TclShellHistMax', 50)
+call s:SetDefault('g:TclShellHistMax',          50)
 
 " No need for the function any longer.
 delfunction s:SetDefault
@@ -56,10 +51,11 @@ let s:promptlen = len(s:prompttext)
 " Start with no history.
 let s:TclShellHistory=[]
 let s:TclShellHistPtr=-1
+"}}}1
 
-" Section: Functions. {{{1
+" Section: Functions.
 
-" Function: TclShell#OpenShell(...) -- Create or switch to the Tcl Shell buffer. {{{2
+" Function: TclShell#OpenShell(...) -- Create or switch to the Tcl Shell buffer. {{{1
 " Takes optional Tcl code to execute.
 function! TclShell#OpenShell(...)
     " If not already in the buffer create/open it.
@@ -93,7 +89,7 @@ function! TclShell#OpenShell(...)
     endif
 endfunction
 
-" Function: TclShell#Init()         -- Initialize a new buffer. {{{2
+" Function: TclShell#Init()         -- Initialize a new buffer. {{{1
 function! TclShell#Init()
     " Standard key mappings to execute code.
     nnoremap <silent> <buffer> <cr>             :call TclShell#Exec()<cr>
@@ -147,7 +143,7 @@ function! TclShell#Init()
     call TclShell#InitTcl()
 endfunction
 
-" Function: TclShell#Prompt()       -- Display the prompt. {{{2
+" Function: TclShell#Prompt()       -- Display the prompt. {{{1
 function! TclShell#Prompt()
     let l:line = getline("$")
     if matchstr(l:line, s:prompttext) == ""
@@ -163,7 +159,7 @@ function! TclShell#Prompt()
     let s:TclShellHistPtr=-1
 endfunction
 
-" Function: TclShell#Hist(dir)      -- Move in the history. {{{2
+" Function: TclShell#Hist(dir)      -- Move in the history. {{{1
 " Move forward and back in history.
 " Direction is true for up, false for down.
 function! TclShell#Hist(dir)
@@ -189,13 +185,13 @@ function! TclShell#Hist(dir)
     endif
 endfunction
 
-" Function: TclShell#Clear()        -- Clear the shell buffer. {{{2
+" Function: TclShell#Clear()        -- Clear the shell buffer. {{{1
 function! TclShell#Clear()
     normal ggdG
     :call TclShell#Prompt()
 endfunction
 
-" Function: TclShell#Exec()         -- Execute a line of Tcl code. {{{2
+" Function: TclShell#Exec()         -- Execute a line of Tcl code. {{{1
 function! TclShell#Exec()
     let l:line = getline('.')
     if match(l:line, s:prompttext) < 0
@@ -217,13 +213,12 @@ function! TclShell#Exec()
             call append(line('$'), l:tclcode)
             call cursor('$',col([line('$'),'$']))
             :tcl "::_TclShellEval"
-            "call append(line('$'), "")
         endif
         call TclShell#Prompt()
     endif
 endfunction
 
-" Function: TclShell#InitTcl()      -- Initialize the Tcl interpreter. {{{2
+" Function: TclShell#InitTcl()      -- Initialize the Tcl interpreter. {{{1
 " Create the procedure to evaluate commands entered in the shell.
 " Since the interpreter will likely outlast the buffer check that the
 " procedure does not exist first.
