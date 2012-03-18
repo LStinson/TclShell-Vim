@@ -1,6 +1,6 @@
 *TclShell.txt* Tcl Shell for Vim
                              For Vim version 7.x.
-                  Last Changed: Fri Feb 03 12:45 PM 2012 EST
+                  Last Changed: Sun Mar 18 12:14 AM 2012 EDT
                    https://github.com/LStinson/TclShell-Vim
              http://www.vim.org/scripts/script.php?script_id=3750
                              http://wiki.tcl.tk/28782
@@ -46,7 +46,20 @@ Commands created for user use.
 
 :TclShell					*:TclShell*
 	Open the Tcl Shell window.
-	Can also pass Tcl code to be executed.
+
+:TclEval
+	Opents the Tcl Shell window and evaluates TCL code.
+	By default will evaluate the current file.
+	Will operate on a range or visual selection.
+	Tcl can be passed in, without quotes.
+	Examples: >
+	" Execute Tcl code.
+	:TclEval info vars
+	" Execute the current file.
+	:TclEval
+	" Execute the fist five lines of the file.
+	:1,5TclEval
+<
 
 ==============================================================================
 MAPPINGS					*tclshell-mappings*
