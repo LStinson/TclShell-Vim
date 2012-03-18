@@ -1,7 +1,7 @@
 # vim:foldmethod=marker
 # ============================================================================
 # File:         TclShell.tcl (Autoload)
-# Last Changed: Fri, Dec 30, 2011
+# Last Changed: Sat Mar 17 01:37 PM 2012 EDT
 # Maintainer:   LoranceStinson@gmail.com
 # License:      Public Domain
 #
@@ -82,7 +82,10 @@ if {[info procs ::_TclShellEval] eq ""} {
     #
     # Side effect:
     #   The TclShell buffer is modified.
-    proc ::_TclShellEval {} {
+    proc ::_TclShellEval {command} {
+        # Clean the Command to execute of carriage returns.
+        set command [string map {\r \n} $command]
+
         # Temporarily replace 'puts' with a special one.
         rename puts _TclShellPutsReal
         rename _TclShellPuts puts
@@ -90,11 +93,6 @@ if {[info procs ::_TclShellEval] eq ""} {
         # Initialize the output variable.
         global _TclShellOutput
         set _TclShellOutput ""
-
-        # Get the Tcl code to execute from the TclShell buffer.
-        set buf $::vim::current(buffer)
-        set command [$buf get end]
-        $buf delete end
 
         # Special handling for variables.
         if {[string index $command 0] eq {$}} {
@@ -120,7 +118,6 @@ if {[info procs ::_TclShellEval] eq ""} {
         rename puts _TclShellPuts
         rename _TclShellPutsReal puts
         unset _TclShellOutput
-        return 0
     }
 
 }

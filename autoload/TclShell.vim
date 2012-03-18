@@ -1,7 +1,7 @@
 " vim:foldmethod=marker
 " ============================================================================
 " File:         TclShell.vim (Autoload)
-" Last Changed: Fri, Dec 30, 2011
+" Last Changed: Sat Mar 17 01:37 PM 2012 EDT
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 "
@@ -65,8 +65,11 @@ let s:TclShellHistPtr=-1
 " Section: Functions.
 
 " Function: TclShell#OpenShell(...) -- Create or switch to the Tcl Shell buffer. {{{1
-" Takes optional Tcl code to execute.
+" Takes optional Tcl code or range to execute.
 function! TclShell#OpenShell(...)
+    " Note the current buffer.
+    let l:curbufnr = bufnr('%')
+
     " If not already in the buffer create/open it.
     if expand("%:p:t") != "_TclShell_"
         " Make the buffer or switch to it.
@@ -86,15 +89,21 @@ function! TclShell#OpenShell(...)
         " Reset these every time the buffer is entered.
         setlocal buftype=nofile
         setlocal bufhidden=hide
+        setlocal nobuflisted
         setlocal noswapfile
         call TclShell#Prompt()
     endif
 
-    " If there is an argument execute it.
-    if a:0 == 1
-        let l:line = getline('$') . substitute(a:1, '[\r\n]*$', '', '')
-        call setline('$', l:line)
-        call TclShell#Exec()
+    " Process arguments.
+    if a:0 != 0
+        if a:1 != ''
+            " Code was passed. Paste it in as if the user typed it.
+            let l:line = getline('$') . substitute(a:1, '[\r\n]*$', '', '')
+            call setline('$', l:line)
+            call TclShell#Exec()
+        elseif a:0 == 3
+            " Process the passed range.
+        endif
     endif
 endfunction
 
@@ -219,11 +228,8 @@ function! TclShell#Exec()
                 endif
                 call insert(s:TclShellHistory, l:tclcode)
             endif
-            call append(line('$'), l:tclcode)
-            call cursor('$',col([line('$'),'$']))
-            :tcl "::_TclShellEval"
+            execute 'tcl ::_TclShellEval {' . l:tclcode . '}'
         endif
         call TclShell#Prompt()
     endif
 endfunction
-

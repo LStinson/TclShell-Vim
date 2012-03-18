@@ -1,6 +1,6 @@
 " =============================================================================
 " File:         TclShell.vim (Plugin)
-" Last Changed: Sun, Sep 25, 2011
+" Last Changed: Mon Feb 20 11:49 AM 2012 EST
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 "
@@ -29,6 +29,8 @@ let g:loadedTclShell= 1
 
 " End user command.
 command! -nargs=? TclShell :call TclShell#OpenShell(<f-args>)
+command! -nargs=? -range=% TclEval <line1>,<line2>:call
+            \ TclShell#OpenShell(<f-args>, <line1>, <line2>)
 
 " Default key map prefix.
 if !exists("g:TclShellKey")
