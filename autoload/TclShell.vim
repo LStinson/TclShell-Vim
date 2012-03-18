@@ -1,7 +1,7 @@
 " vim:foldmethod=marker
 " ============================================================================
 " File:         TclShell.vim (Autoload)
-" Last Changed: Sat Mar 17 01:37 PM 2012 EDT
+" Last Changed: Sun Mar 18 12:17 AM 2012 EDT
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 "
@@ -64,12 +64,33 @@ let s:TclShellHistPtr=-1
 
 " Section: Functions.
 
-" Function: TclShell#OpenShell(...) -- Create or switch to the Tcl Shell buffer. {{{1
-" Takes optional Tcl code or range to execute.
-function! TclShell#OpenShell(...)
-    " Note the current buffer.
+" Function: TclShell#Eval(...)      -- Evaluates Tcl Code. {{{1
+function! TclShell#Eval(...) range
+    " Note the current buffer in case a range was passed..
     let l:curbufnr = bufnr('%')
 
+    " Open the Tcl window.
+    call TclShell#OpenShell()
+
+    " Get the code to execute.
+    if a:0 != 0 && a:1 != ''
+        " Code was passed.
+        let l:code = substitute(a:1, '[\r\n]*$', '', '')
+    else
+        " Process a range.
+        let l:lines = getbufline(l:curbufnr, a:firstline, a:lastline)
+        let l:code = join(l:lines, "\n")
+    endif
+
+    " Execute the Tcl code.
+    execute 'tcl ::_TclShellEval {' . l:code . '}'
+
+    " Redisplay the prompt.
+    call TclShell#Prompt()
+endfunction
+
+" Function: TclShell#OpenShell(...) -- Create or switch to the Tcl Shell buffer. {{{1
+function! TclShell#OpenShell()
     " If not already in the buffer create/open it.
     if expand("%:p:t") != "_TclShell_"
         " Make the buffer or switch to it.
@@ -92,18 +113,6 @@ function! TclShell#OpenShell(...)
         setlocal nobuflisted
         setlocal noswapfile
         call TclShell#Prompt()
-    endif
-
-    " Process arguments.
-    if a:0 != 0
-        if a:1 != ''
-            " Code was passed. Paste it in as if the user typed it.
-            let l:line = getline('$') . substitute(a:1, '[\r\n]*$', '', '')
-            call setline('$', l:line)
-            call TclShell#Exec()
-        elseif a:0 == 3
-            " Process the passed range.
-        endif
     endif
 endfunction
 

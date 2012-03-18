@@ -1,6 +1,6 @@
 " =============================================================================
 " File:         TclShell.vim (Plugin)
-" Last Changed: Mon Feb 20 11:49 AM 2012 EST
+" Last Changed: Sun Mar 18 12:15 AM 2012 EDT
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 "
@@ -27,10 +27,10 @@ elseif exists("g:loadedTclShell") || &cp || !has('tcl')
 endif
 let g:loadedTclShell= 1
 
-" End user command.
-command! -nargs=? TclShell :call TclShell#OpenShell(<f-args>)
-command! -nargs=? -range=% TclEval <line1>,<line2>:call
-            \ TclShell#OpenShell(<f-args>, <line1>, <line2>)
+" End user commands.
+command! TclShell :call TclShell#OpenShell()
+command! -nargs=? -range=% TclEval
+            \ <line1>,<line2>call TclShell#Eval(<f-args>)
 
 " Default key map prefix.
 if !exists("g:TclShellKey")
@@ -42,5 +42,5 @@ if g:TclShellKey != ""
     exec 'nnoremap <silent> ' . g:TclShellKey .
        \ ' :call TclShell#OpenShell()<cr>'
     exec 'vnoremap <silent> ' . g:TclShellKey .
-       \ " y:call TclShell#OpenShell('<C-R>" . '"' . "')<cr>"
+       \ " y:call TclShell#Eval('<C-R>" . '"' . "')<cr>"
 endif
