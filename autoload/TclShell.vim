@@ -1,7 +1,7 @@
 " vim:foldmethod=marker
 " ============================================================================
 " File:         TclShell.vim (Autoload)
-" Last Changed: Mon Mar 19 09:33 AM 2012 EDT
+" Last Changed: Mon Mar 19 09:58 AM 2012 EDT
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 "
@@ -69,7 +69,7 @@ function! TclShell#Eval(...) range
     " Note the current buffer information if a range is passed.
     let l:curbufnr = bufnr('%')
     let l:lastline = line('$')
-    let l:fname = expand('%:p')
+    let l:fname = substitute(expand('%:p'), '\\', '\\\\', 'g')
 
     " Open the Tcl window.
     call TclShell#OpenShell()
