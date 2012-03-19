@@ -1,7 +1,7 @@
 " vim:foldmethod=marker
 " ============================================================================
 " File:         TclShell.vim (Autoload)
-" Last Changed: Sun Mar 18 12:17 AM 2012 EDT
+" Last Changed: Mon Mar 19 09:33 AM 2012 EDT
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 "
@@ -16,7 +16,7 @@ if exists("g:loadedTclShellAuto") || &cp || !has('tcl')
     finish
 endif
 let g:loadedTclShellAuto= 1
-
+" }}}
 
 " Defaults  {{{1
 
@@ -60,14 +60,16 @@ let s:promptlen = len(s:prompttext)
 " Start with no history.
 let s:TclShellHistory=[]
 let s:TclShellHistPtr=-1
-"}}}1
+" }}}
 
 " Section: Functions.
 
 " Function: TclShell#Eval(...)      -- Evaluates Tcl Code. {{{1
 function! TclShell#Eval(...) range
-    " Note the current buffer in case a range was passed..
+    " Note the current buffer information if a range is passed.
     let l:curbufnr = bufnr('%')
+    let l:lastline = line('$')
+    let l:fname = expand('%:p')
 
     " Open the Tcl window.
     call TclShell#OpenShell()
@@ -75,21 +77,36 @@ function! TclShell#Eval(...) range
     " Get the code to execute.
     if a:0 != 0 && a:1 != ''
         " Code was passed.
-        let l:code = substitute(a:1, '[\r\n]*$', '', '')
+        call setline('$', getline('$') . a:1)
+        call TclShell#Exec()
+    elseif a:firstline == 1 && a:lastline == l:lastline
+        " Source the file.
+        call setline('$', getline('$') . 'source {' . l:fname . '}')
+        call TclShell#Exec()
     else
         " Process a range.
         let l:lines = getbufline(l:curbufnr, a:firstline, a:lastline)
         let l:code = join(l:lines, "\n")
+
+        " Tell the user what we are doing.
+        let l:descr = '# Evaluating line'
+        if a:firstline == a:lastline
+            let l:descr .= ' ' . a:firstline
+        else
+            let l:descr .= 's ' . a:firstline . ' to ' . a:lastline
+        endif
+        let l:descr .= ' of file ' . l:fname
+        call setline('$', getline('$') . l:descr)
+
+        " Execute the Tcl code.
+        execute 'tcl ::_TclShellEval {' . l:code . '}'
+
+        " Redisplay the prompt.
+        call TclShell#Prompt()
     endif
+endfunction " }}}
 
-    " Execute the Tcl code.
-    execute 'tcl ::_TclShellEval {' . l:code . '}'
-
-    " Redisplay the prompt.
-    call TclShell#Prompt()
-endfunction
-
-" Function: TclShell#OpenShell(...) -- Create or switch to the Tcl Shell buffer. {{{1
+" Function: TclShell#OpenShell(...) -- Open the Tcl Shell buffer. {{{1
 function! TclShell#OpenShell()
     " If not already in the buffer create/open it.
     if expand("%:p:t") != "_TclShell_"
@@ -114,7 +131,7 @@ function! TclShell#OpenShell()
         setlocal noswapfile
         call TclShell#Prompt()
     endif
-endfunction
+endfunction " }}}
 
 " Function: TclShell#Init()         -- Initialize a new buffer. {{{1
 function! TclShell#Init()
@@ -163,12 +180,12 @@ function! TclShell#Init()
        \ s:prompttext . '" end=+$+ contains=@TclSyn'
     exec "hi link TclShell Comment"
     if g:TclShellInsert
-        au BufEnter <buffer> startinsert!
+        autocmd BufEnter <buffer> startinsert!
     endif
 
     " Load the TCL code to execute Tcl Shell input.
     execute ':tclfile ' . g:TclShellTclFile
-endfunction
+endfunction " }}}
 
 " Function: TclShell#Prompt()       -- Display the prompt. {{{1
 function! TclShell#Prompt()
@@ -184,7 +201,7 @@ function! TclShell#Prompt()
         startinsert!
     endif
     let s:TclShellHistPtr=-1
-endfunction
+endfunction " }}}
 
 " Function: TclShell#Hist(dir)      -- Move in the history. {{{1
 " Move forward and back in history.
@@ -210,13 +227,13 @@ function! TclShell#Hist(dir)
     if g:TclShellInsert
         startinsert!
     endif
-endfunction
+endfunction " }}}
 
 " Function: TclShell#Clear()        -- Clear the shell buffer. {{{1
 function! TclShell#Clear()
     normal ggdG
     :call TclShell#Prompt()
-endfunction
+endfunction " }}}
 
 " Function: TclShell#Exec()         -- Execute a line of Tcl code. {{{1
 function! TclShell#Exec()
@@ -228,7 +245,7 @@ function! TclShell#Exec()
         let l:tclcode = substitute(l:line, s:prompttext, '', '')
         if l:tclcode == ""
             return TclShell#Prompt()
-        elseif l:tclcode =~ "^clear\\>"
+        elseif l:tclcode =~ '^\s*clear\s*$'
             return TclShell#Clear()
         else
             if g:TclShellHistMax
@@ -241,4 +258,4 @@ function! TclShell#Exec()
         endif
         call TclShell#Prompt()
     endif
-endfunction
+endfunction " }}}

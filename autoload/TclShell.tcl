@@ -1,7 +1,7 @@
 # vim:foldmethod=marker
 # ============================================================================
 # File:         TclShell.tcl (Autoload)
-# Last Changed: Sat Mar 17 01:37 PM 2012 EDT
+# Last Changed: Mon Mar 19 09:12 AM 2012 EDT
 # Maintainer:   LoranceStinson@gmail.com
 # License:      Public Domain
 #
@@ -12,7 +12,7 @@
 # Only define the procedures once.
 if {[info procs ::_TclShellEval] eq ""} {
 
-    # _TclShellAppend -- Append text to the TclShell buffer.
+    # _TclShellAppend -- Append text to the TclShell buffer. {{{1
     #
     # Arguments:
     #   $text       The text to append to the buffer.
@@ -31,8 +31,9 @@ if {[info procs ::_TclShellEval] eq ""} {
             $buf append end $line
         }
     }
+    # }}}
 
-    # _TclShellPuts -- Send output to the TclShell buffer.
+    # _TclShellPuts -- Send output to the TclShell buffer. {{{1
     #   Appends the output to the global variable _TclShellOutput or to the
     #   TclShell buffer depending on the presence of -noewline.
     #
@@ -69,22 +70,23 @@ if {[info procs ::_TclShellEval] eq ""} {
         }
         return ""
     }
+    # }}}
 
-    # _TclShellEval -- Evaluates Tcl code.
+    # _TclShellEval -- Evaluates Tcl code. {{{1
     #   Reads Tcl code from the TclShell buffer.
     #   The results and output are placed back into the buffer.
     #
     # Arguments:
-    #   None
+    #   $tclcode    The Tcl code to execute.
     #
     # Result:
     #   None
     #
     # Side effect:
     #   The TclShell buffer is modified.
-    proc ::_TclShellEval {command} {
-        # Clean the Command to execute of carriage returns.
-        set command [string map {\r \n} $command]
+    proc ::_TclShellEval {tclcode} {
+        # Clean the code of carriage returns.
+        set tclcode [string map {\r \n} $tclcode]
 
         # Temporarily replace 'puts' with a special one.
         rename puts _TclShellPutsReal
@@ -95,13 +97,13 @@ if {[info procs ::_TclShellEval] eq ""} {
         set _TclShellOutput ""
 
         # Special handling for variables.
-        if {[string index $command 0] eq {$}} {
-            set command "return $command"
+        if {[string index $tclcode 0] eq {$}} {
+            set tclcode "return $tclcode"
         }
 
         # Attempt to evaluate the Tcl code.
         catch {
-            uplevel 1 eval [list $command]
+            uplevel 1 eval [list $tclcode]
         } result
 
         # Write any held output to the TclShell buffer.
@@ -119,5 +121,6 @@ if {[info procs ::_TclShellEval] eq ""} {
         rename _TclShellPutsReal puts
         unset _TclShellOutput
     }
+    # }}}
 
 }

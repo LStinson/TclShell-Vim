@@ -1,6 +1,6 @@
-" =============================================================================
+" ============================================================================
 " File:         TclShell.vim (Plugin)
-" Last Changed: Sun Mar 18 12:15 AM 2012 EDT
+" Last Changed: Mon Mar 19 08:49 AM 2012 EDT
 " Maintainer:   Lorance Stinson AT Gmail...
 " License:      Public Domain
 "
@@ -17,7 +17,7 @@
 "
 " Note:         Can only enter one line of code.
 "               Pressing Enter executes the code.
-" =============================================================================
+" ============================================================================
 
 if v:version < 700
     echoerr 'TclShell requires Vim 7 or later.'
@@ -29,8 +29,7 @@ let g:loadedTclShell= 1
 
 " End user commands.
 command! TclShell :call TclShell#OpenShell()
-command! -nargs=? -range=% TclEval
-            \ <line1>,<line2>call TclShell#Eval(<f-args>)
+command! -nargs=? -range=% TclEval <line1>,<line2>call TclShell#Eval(<f-args>)
 
 " Default key map prefix.
 if !exists("g:TclShellKey")
